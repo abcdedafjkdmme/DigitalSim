@@ -182,26 +182,54 @@ TEST(s_74LS, four_bit_counter) {
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 0);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 0);
-	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
+
+	s_74LS::four_bit_counter(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
+
+	s_74LS::four_bit_counter(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
+
+	s_74LS::four_bit_counter(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
 
 	s_74LS::four_bit_counter(input, output);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 0);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
 
 	s_74LS::four_bit_counter(input, output);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 0);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
 
 	s_74LS::four_bit_counter(input, output);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 1);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
 
 	s_74LS::four_bit_counter(input, output);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 1);
 	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 1);
 
+	s_74LS::four_bit_counter(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[1]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[2]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[3]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.ripple_carry), 1);
 }
