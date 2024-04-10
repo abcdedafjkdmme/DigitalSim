@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include "common.h"
+#include <array>
 
 using volt = double;
 constexpr volt volt_floating = -1;
@@ -35,6 +36,16 @@ namespace s_74LS {
 	constexpr volt VOH_typ = 3.4;
 	constexpr volt VOL_typ = 0.35;
 
+	enum class multi_input_logic_func {
+		and_gate,
+		nand_gate,
+		nor_gate,
+		or_gate
+	};
+	template<size_t size>
+	struct multi_gate_result {
+		std::array<volt,size> Y{};
+	};
 	struct quad_gate_result {
 		volt Y1{};
 		volt Y2{};
@@ -67,6 +78,75 @@ namespace s_74LS {
 		return ::bool_to_volt(in, VOH_typ, VOL_typ);
 	}
 
+	template<typename Iterator>
+	static volt single_multi_input_logic_gate(Iterator inputs_begin, Iterator inputs_end, multi_input_logic_func logic_func) {
+		bool result{};
+		for (auto it = inputs_begin; it != inputs_end; ++it) {
+			if (logic_func == multi_input_logic_func::and_gate || logic_func == multi_input_logic_func::nand_gate) {
+				result = result && volt_to_bool(*it);
+			}
+			else if (logic_func == multi_input_logic_func::or_gate || logic_func == multi_input_logic_func::nor_gate) {
+				result = result || volt_to_bool(*it);
+			}
+		}
+		if (logic_func == multi_input_logic_func::nand_gate) {
+			result = !result;
+		}
+		else if (logic_func == multi_input_logic_func::nor_gate) {
+			result = !result;
+		}
+		return bool_to_volt(result);
+	}
+	template<typename Container>
+	static volt single_multi_input_logic_gate(Container const& cont, multi_input_logic_func logic_func) {
+		return single_multi_input_logic_gate(cont.begin(), cont.end(), logic_func);
+	}
+	static volt single_single_input_not_gate(volt A) {
+		return bool_to_volt(!volt_to_bool(A));
+	}
+	template<size_t num_of_outputs, typename A_inputs_iter, typename B_inputs_iter>
+	static multi_gate_result<num_of_outputs> multi_two_input_logic_gate(A_inputs_iter A_inputs_begin, A_inputs_iter A_inputs_end, B_inputs_iter B_inputs_begin, B_inputs_iter B_inputs_end, multi_input_logic_func logic_func) {
+
+		assert(std::distance(A_inputs_begin, A_inputs_end) == num_of_outputs);
+		assert(std::distance(B_inputs_begin, B_inputs_end) == num_of_outputs);
+
+		multi_gate_result<num_of_outputs> result{};
+
+		auto A_it = A_inputs_begin;
+		auto B_it = B_inputs_begin;
+		for (int i = 0; i < num_of_outputs; i++) {
+
+			auto inputs = { *A_it, *B_it };
+			result.Y[i] = single_multi_input_logic_gate(inputs, logic_func);
+
+			++A_it;
+			++B_it;
+		}
+		return result;
+	}
+	template<size_t num_of_outputs, typename A_Container, typename B_Container>
+	static multi_gate_result<num_of_outputs> multi_two_input_logic_gate(A_Container const& A_inputs, B_Container const& B_inputs, multi_input_logic_func logic_func) {
+		return multi_input_logic_gate(A_inputs.begin(), A_inputs.end(), B_inputs.begin(), B_inputs.end(), logic_func);
+	}
+	template<size_t num_of_outputs, typename Iterator>
+	static multi_gate_result<num_of_outputs> multi_single_input_not_gate(Iterator A_inputs_begin, Iterator A_inputs_end) {
+		multi_gate_result result{};
+		int i = 0;
+		for (auto A_it = A_inputs_begin; A_it != A_inputs_begin; ++A_it) {
+			result.Y[i] = single_single_input_not_gate(*A_it);
+			i++;
+		}
+		return result;
+	}
+	template<typename A_inputs_iter, typename B_inputs_iter>
+	multi_gate_result<4> quad_two_input_nand_gate(A_inputs_iter A_inputs_begin, A_inputs_iter A_inputs_end, B_inputs_iter B_inputs_begin, B_inputs_iter B_inputs_end) {
+		return multi_two_input_logic_gate<4>( A_inputs_begin, A_inputs_end, B_inputs_begin, B_inputs_end, multi_input_logic_func::nand_gate);
+	}
+	template<typename A_Container, typename B_Container>
+	multi_gate_result<4> quad_two_input_nand_gate(A_Container const& A_inputs, B_Container const& B_inputs) {
+		return quad_two_input_nand_gate(A_inputs.begin(), A_inputs.end(), B_inputs.begin(), B_inputs.end());
+	}
+	/*
 	static volt nand_single(volt A, volt B) {
 		return bool_to_volt(!(volt_to_bool(A) && volt_to_bool(B)));
 	}
@@ -81,6 +161,7 @@ namespace s_74LS {
 		res.Y4 = nand_single(A4, B4);
 		return res;
 	}
+	*/
 
 	static volt and_single(volt A, volt B) {
 		return bool_to_volt(volt_to_bool(A) && volt_to_bool(B));
