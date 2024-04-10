@@ -15,29 +15,6 @@ namespace s_74LS {
 		std::array<volt, size> Y{};
 	};
 
-	template<size_t size>
-	struct multi_d_flip_flop_inputs {
-		std::array<volt, size> PRE_inv{};
-		std::array<volt, size> CLR_inv{};
-		std::array<volt, size> CLK{};
-		std::array<volt, size> D{};
-	};
-
-	template<size_t size>
-	struct multi_jk_flip_flop_inputs {
-		std::array<volt, size> PRE_inv{};
-		std::array<volt, size> CLR_inv{};
-		std::array<volt, size> CLK{};
-		std::array<volt, size> J{};
-		std::array<volt, size> K{};
-	};
-
-	template<size_t size>
-	struct multi_flip_flop_outputs {
-		std::array<volt, size> Q;
-		std::array<volt, size> Q_inv;
-	};
-
 
 	template<typename Iterator>
 	static volt single_multi_input_logic_gate(Iterator inputs_begin, Iterator inputs_end, multi_input_logic_func logic_func) {
@@ -153,83 +130,7 @@ namespace s_74LS {
 
 
 
-	static void single_jk_flip_flop(volt PRE_inv, volt CLR_inv, volt CLK, volt J, volt K, volt& Q, volt& Q_inv) {
-		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 1)) {
-			Q = bool_to_volt(1);
-			Q_inv = bool_to_volt(0);
-			return;
-		}
-		if ((volt_to_bool(PRE_inv) == 1) && (volt_to_bool(CLR_inv) == 0)) {
-			Q = bool_to_volt(0);
-			Q_inv = bool_to_volt(1);
-			return;
-		}
-		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 0)) {
-			Q = bool_to_volt(1);
-			Q_inv = bool_to_volt(1);
-			expect(false && "d flip flop's PRE_inv and CLR_inv are both 0");
-			return;
-		}
-		if (volt_to_bool(CLK) == 1) {
-			if (volt_to_bool(J) == 1 && volt_to_bool(K) == 1) {
-				std::swap(Q, Q_inv);
-				return;
-			}
-			if (volt_to_bool(J) == 1) {
-				Q = bool_to_volt(1);
-				Q_inv = bool_to_volt(0);
-				return;
-			}
-			if (volt_to_bool(K) == 1) {
-				Q = bool_to_volt(0);
-				Q_inv = bool_to_volt(1);
-				return;
-			}
-		}
-	}
-	template<size_t num>
-	void multi_jk_flip_flop(multi_jk_flip_flop_inputs<num> const& input, multi_flip_flop_outputs<num>& output) {
-		for (size_t i = 0; i < num; i++) {
-			single_jk_flip_flop(input.PRE_inv[i], input.CLR_inv[i], input.CLK[i], input.J[i], input.K[i], output.Q[i], output.Q_inv[i]);
-		}
-	}
-	void dual_jk_flip_flop(multi_jk_flip_flop_inputs<2> const& input, multi_flip_flop_outputs<2>& output) {
-		multi_jk_flip_flop<2>(input, output);
-	}
-
-
-	static void single_d_flip_flop(volt PRE_inv, volt CLR_inv, volt CLK, volt D, volt& Q, volt& Q_inv) {
-		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 1)) {
-			Q = bool_to_volt(1);
-			Q_inv = bool_to_volt(0);
-			return;
-		}
-		if ((volt_to_bool(PRE_inv) == 1) && (volt_to_bool(CLR_inv) == 0)) {
-			Q = bool_to_volt(0);
-			Q_inv = bool_to_volt(1);
-			return;
-		}
-		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 0)) {
-			Q = bool_to_volt(1);
-			Q_inv = bool_to_volt(1);
-			expect(false && "d flip flop's PRE_inv and CLR_inv are both 0");
-			return;
-		}
-		if (volt_to_bool(CLK) == 1) {
-			Q = D;
-			Q_inv = bool_to_volt(!volt_to_bool(D));
-			return;
-		}
-	}
-	template<size_t num>
-	void multi_d_flip_flop(multi_d_flip_flop_inputs<num> const& input, multi_flip_flop_outputs<num>& output) {
-		for (int i = 0; i < num; i++) {
-			single_d_flip_flop(input.PRE_inv[i], input.CLR_inv[i], input.CLK[i], input.D[i], output.Q[i], output.Q_inv[i]);
-		}
-	}
-	void dual_d_flip_flop(multi_d_flip_flop_inputs<2> const& input, multi_flip_flop_outputs<2>& output) {
-		multi_d_flip_flop<2>(input, output);
-	}
+	
 	/*
 	void dual_d_flip_flop(multi_d_flip_flop_inputs<2> const& input, multi_d_flip_flop_output<2>& result) {
 		single_d_flip_flop_output res1{ .Q = res.Q1, .Q_inv = res.Q1_inv };

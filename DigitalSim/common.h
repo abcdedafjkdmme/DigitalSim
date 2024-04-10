@@ -19,12 +19,7 @@ constexpr bool volt_to_bool(volt in, volt VH_min, volt VL_max) {
 	else { return false; }
 }
 constexpr volt bool_to_volt(bool in, volt VH, volt VL) {
-	if (in) {
-		return VH;
-	}
-	else {
-		return VL;
-	}
+	return in ? VH : VL;
 }
 
 #define expect(value) \

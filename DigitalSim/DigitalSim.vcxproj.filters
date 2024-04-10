@@ -29,5 +29,8 @@
     <ClInclude Include="74LS_IC\defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="74LS_IC\sequential_gates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
