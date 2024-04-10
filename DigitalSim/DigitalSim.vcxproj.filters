@@ -20,10 +20,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="74LS_logic_gates.h">
+    <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
+    <ClInclude Include="74LS_IC\logic_gates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="74LS_IC\defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

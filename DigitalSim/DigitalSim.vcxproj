@@ -154,7 +154,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="74LS_logic_gates.h" />
+    <ClInclude Include="74LS_IC\defines.h" />
+    <ClInclude Include="74LS_IC\logic_gates.h" />
     <ClInclude Include="common.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "74LS_logic_gates.h"
+#include "74LS_IC/logic_gates.h"
+
 
 TEST(s_74LS, nand_gate) {
 	auto A_inputs = { 5,0,0,0 };
@@ -29,14 +30,92 @@ TEST(s_74LS, not_gate) {
 	EXPECT_EQ(s_74LS::volt_to_bool(s_74LS::quad_single_input_not_gate(A_inputs).Y[0]), 0);
 }
 
-//TEST(s_74LS, d_flip_flop) {
-//	s_74LS::multi_d_flip_flop_inputs<2> input{};
-//	input.PRE_inv = {};
-//	s_74LS::dual_d_flip_flop()
-//}
+TEST(s_74LS, d_flip_flop) {
+	s_74LS::multi_d_flip_flop_inputs<2> input{};
+	s_74LS::multi_flip_flop_outputs<2> output{};
+
+	input = { .PRE_inv = {0,5}, .CLR_inv = {5,5} };
+	s_74LS::dual_d_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 0);
+
+	input = { .PRE_inv = {5,5}, .CLR_inv = {0,5}, .CLK = {0}, };
+	s_74LS::dual_d_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 1);
+
+	input = { .PRE_inv = {0,5}, .CLR_inv = {0,5}, .CLK = {0}, };
+	s_74LS::dual_d_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 1);
+
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {5}, .D = {5} };
+	s_74LS::dual_d_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 0);
 
 
-/* 
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {5}, .D = {0} };
+	s_74LS::dual_d_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 1);
+
+	volt prev_Q = output.Q[0];
+	volt prev_Q_inv = output.Q_inv[0];
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {0}, .D = {1000} };
+	s_74LS::dual_d_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), s_74LS::volt_to_bool(prev_Q));
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), s_74LS::volt_to_bool(prev_Q_inv));
+
+}
+
+TEST(s_74LS, jk_flip_flop) {
+	s_74LS::multi_jk_flip_flop_inputs<2> input{};
+	s_74LS::multi_flip_flop_outputs<2> output{};
+
+
+	input = { .PRE_inv = {0,5}, .CLR_inv = {5,5} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 0);
+
+	input = { .PRE_inv = {5,5}, .CLR_inv = {0,5}, .CLK = {0}, .J = {}, .K = {} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 1);
+
+	input = { .PRE_inv = {0,5}, .CLR_inv = {0,5}, .CLK = {0}, .J = {}, .K = {} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 1);
+
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {5}, .J = {5}, .K = {0} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 1);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 0);
+
+
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {5}, .J = {0}, .K = {5} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), 0);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), 1);
+
+	volt prev_Q = output.Q[0];
+	volt prev_Q_inv = output.Q_inv[0];
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {5}, .J = {0}, .K = {0} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), s_74LS::volt_to_bool(prev_Q));
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), s_74LS::volt_to_bool(prev_Q_inv));
+
+	prev_Q = output.Q[0];
+	prev_Q_inv = output.Q_inv[0];
+	input = { .PRE_inv = {5,5}, .CLR_inv = {5,5}, .CLK = {5}, .J = {5}, .K = {5} };
+	s_74LS::dual_jk_flip_flop(input, output);
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q[0]), !s_74LS::volt_to_bool(prev_Q));
+	EXPECT_EQ(s_74LS::volt_to_bool(output.Q_inv[0]), !s_74LS::volt_to_bool(prev_Q_inv));
+}
+
+/*
 TEST(s_74LS, d_flip_flop) {
 	s_74LS::dual_d_flip_flop_result res{};
 

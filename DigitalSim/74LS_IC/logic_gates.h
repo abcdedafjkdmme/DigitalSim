@@ -1,17 +1,9 @@
 #pragma once
 #include <cassert>
-#include "common.h"
 #include <array>
-
+#include "defines.h"
 
 namespace s_74LS {
-	constexpr volt VCC_min = 4.75;
-	constexpr volt VCC_max = 5.25;
-	constexpr volt VIH_min = 2;
-	constexpr volt VIL_max = 0.8;
-	constexpr volt VOH_typ = 3.4;
-	constexpr volt VOL_typ = 0.35;
-
 	enum class multi_input_logic_func {
 		and_gate,
 		nand_gate,
@@ -30,18 +22,22 @@ namespace s_74LS {
 		std::array<volt, size> CLK{};
 		std::array<volt, size> D{};
 	};
+
 	template<size_t size>
-	struct multi_d_flip_flop_output {
+	struct multi_jk_flip_flop_inputs {
+		std::array<volt, size> PRE_inv{};
+		std::array<volt, size> CLR_inv{};
+		std::array<volt, size> CLK{};
+		std::array<volt, size> J{};
+		std::array<volt, size> K{};
+	};
+
+	template<size_t size>
+	struct multi_flip_flop_outputs {
 		std::array<volt, size> Q;
 		std::array<volt, size> Q_inv;
 	};
 
-	constexpr bool volt_to_bool(volt in) {
-		return ::volt_to_bool(in, VIH_min, VIL_max);
-	}
-	constexpr volt bool_to_volt(bool in) {
-		return ::bool_to_volt(in, VOH_typ, VOL_typ);
-	}
 
 	template<typename Iterator>
 	static volt single_multi_input_logic_gate(Iterator inputs_begin, Iterator inputs_end, multi_input_logic_func logic_func) {
@@ -155,6 +151,53 @@ namespace s_74LS {
 		return multi_single_input_not_gate<4>(A_inputs.begin(), A_inputs.end());
 	}
 
+
+
+	static void single_jk_flip_flop(volt PRE_inv, volt CLR_inv, volt CLK, volt J, volt K, volt& Q, volt& Q_inv) {
+		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 1)) {
+			Q = bool_to_volt(1);
+			Q_inv = bool_to_volt(0);
+			return;
+		}
+		if ((volt_to_bool(PRE_inv) == 1) && (volt_to_bool(CLR_inv) == 0)) {
+			Q = bool_to_volt(0);
+			Q_inv = bool_to_volt(1);
+			return;
+		}
+		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 0)) {
+			Q = bool_to_volt(1);
+			Q_inv = bool_to_volt(1);
+			expect(false && "d flip flop's PRE_inv and CLR_inv are both 0");
+			return;
+		}
+		if (volt_to_bool(CLK) == 1) {
+			if (volt_to_bool(J) == 1 && volt_to_bool(K) == 1) {
+				std::swap(Q, Q_inv);
+				return;
+			}
+			if (volt_to_bool(J) == 1) {
+				Q = bool_to_volt(1);
+				Q_inv = bool_to_volt(0);
+				return;
+			}
+			if (volt_to_bool(K) == 1) {
+				Q = bool_to_volt(0);
+				Q_inv = bool_to_volt(1);
+				return;
+			}
+		}
+	}
+	template<size_t num>
+	void multi_jk_flip_flop(multi_jk_flip_flop_inputs<num> const& input, multi_flip_flop_outputs<num>& output) {
+		for (size_t i = 0; i < num; i++) {
+			single_jk_flip_flop(input.PRE_inv[i], input.CLR_inv[i], input.CLK[i], input.J[i], input.K[i], output.Q[i], output.Q_inv[i]);
+		}
+	}
+	void dual_jk_flip_flop(multi_jk_flip_flop_inputs<2> const& input, multi_flip_flop_outputs<2>& output) {
+		multi_jk_flip_flop<2>(input, output);
+	}
+
+
 	static void single_d_flip_flop(volt PRE_inv, volt CLR_inv, volt CLK, volt D, volt& Q, volt& Q_inv) {
 		if ((volt_to_bool(PRE_inv) == 0) && (volt_to_bool(CLR_inv) == 1)) {
 			Q = bool_to_volt(1);
@@ -175,16 +218,17 @@ namespace s_74LS {
 		if (volt_to_bool(CLK) == 1) {
 			Q = D;
 			Q_inv = bool_to_volt(!volt_to_bool(D));
+			return;
 		}
 	}
 	template<size_t num>
-	void multi_d_flip_flop(multi_d_flip_flop_inputs<num> const& input, multi_d_flip_flop_output<num>& result) {
+	void multi_d_flip_flop(multi_d_flip_flop_inputs<num> const& input, multi_flip_flop_outputs<num>& output) {
 		for (int i = 0; i < num; i++) {
-			single_d_flip_flop(input.PRE_inv[i], input.CLR_inv[i], input.CLK[i], input.D[i], result.Q[i], result.Q_inv[i]);
+			single_d_flip_flop(input.PRE_inv[i], input.CLR_inv[i], input.CLK[i], input.D[i], output.Q[i], output.Q_inv[i]);
 		}
 	}
-	void dual_d_flip_flop(multi_d_flip_flop_inputs<2> const& input, multi_d_flip_flop_output<2>& result) {
-		multi_d_flip_flop(input, result);
+	void dual_d_flip_flop(multi_d_flip_flop_inputs<2> const& input, multi_flip_flop_outputs<2>& output) {
+		multi_d_flip_flop<2>(input, output);
 	}
 	/*
 	void dual_d_flip_flop(multi_d_flip_flop_inputs<2> const& input, multi_d_flip_flop_output<2>& result) {
